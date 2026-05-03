@@ -56,6 +56,15 @@
                 <i class="fas fa-user-edit me-2"></i> Data Penulis
             </a>
 
+            <a class="collapse-item d-block text-decoration-none ps-3 py-1 text-dark" href="<?= BASE_URL; ?>pages/penerbit/index.php">
+                <i class="fas fa-user-edit me-2"></i> Data Penerbit
+            </a>
+
+            <!-- Di bawah link Data Penerbit -->
+            <a class="dropdown-item text-dark ps-3 py-1 d-block text-decoration-none" href="<?= BASE_URL; ?>pages/rak/index.php">
+                <i class="fas fa-archive me-2"></i> Data Rak
+            </a>
+
             <!-- Kamu bisa menambah data master lainnya di sini nanti -->
             <!-- Contoh: Data Rak, Penerbit, dll -->
         </div>
@@ -64,7 +73,7 @@
         <?php endif; ?>
 
         <li class="mt-5">
-            <a href="../logout.php" class="nav-link text-danger">
+            <a href="<?= BASE_URL; ?>logout.php" class="nav-link text-danger">
                 <i class="fas fa-sign-out-alt me-2"></i> Keluar
             </a>
         </li>

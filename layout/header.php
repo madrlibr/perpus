@@ -20,6 +20,8 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login") {
         body { display: flex; min-height: 100vh; background: #f8f9fa; }
         #sidebar { min-width: 250px; max-width: 250px; background: #343a40; color: white; transition: all 0.3s; }
         .content { width: 100%; padding: 20px; }
+
+    <script src="https://cdn.tailwindcss.com"></script>
     </style>
 </head>
 <body>
