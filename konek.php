@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $host = "localhost";
 $user = "root";
-$pass = "";
+$pass = "Cons10DI";
 $db   = "perpus";
 
 $conn = mysqli_connect($host, $user, $pass, $db);

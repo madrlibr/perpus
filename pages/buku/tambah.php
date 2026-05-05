@@ -64,6 +64,7 @@ if (isset($_POST['simpan'])) {
                     ?>
                 </select>
             </div>
+
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Kategori</label>
                 <select name="id_kategori" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white">
@@ -73,6 +74,12 @@ if (isset($_POST['simpan'])) {
                     while($k = mysqli_fetch_assoc($kat)) echo "<option value='".$k['id']."'>".$k['nama_kategori']."</option>";
                     ?>
                 </select>
+
+                <a href="../kategori/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i class="fas fa-plus text-sm"></i>
+                    Tambah Kategori
+                </a>
+
             </div>
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Rak Simpan</label>

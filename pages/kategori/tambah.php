@@ -15,7 +15,11 @@ if(isset($_POST['simpan'])) {
     <div class="mb-8">
         <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Tambah Kategori</h2>
         <a href="index.php" class="text-blue-600 text-sm font-bold flex items-center gap-2 mt-2 hover:underline">
-            <i class="fas fa-arrow-left text-xs"></i> Kembali ke daftar
+            <i class="fas fa-arrow-left text-xs"></i> Kembali ke daftar kategori
+        </a>
+
+        <a href="../buku/tambah.php" class="text-blue-600 text-sm font-bold flex items-center gap-2 mt-2 hover:underline">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali ke daftar Buku
         </a>
     </div>
 

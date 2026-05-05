@@ -10,7 +10,7 @@ $kategori  = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM kategori"));
 $transaksi = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM peminjaman WHERE status_pinjam='dipinjam'"));
 ?>
 
-<div class="p-6 space-y-8">
+<div class="p-6 space-y-8"> 
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
