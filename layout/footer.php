@@ -1,4 +1,10 @@
-</div> <!-- Tutup Content Area -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</main> <!-- Menutup tag <main> yang dibuka di sidebar.php -->
+    </div> <!-- Menutup tag <div class="flex"> yang dibuka di header.php -->
+
+    <!-- Script tambahan jika diperlukan -->
+    <script>
+        // Kamu bisa menambahkan script global di sini
+        // Contoh: Inisialisasi tooltip atau animasi tambahan
+    </script>
 </body>
 </html>

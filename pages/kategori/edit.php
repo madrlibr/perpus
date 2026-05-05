@@ -1,47 +1,38 @@
-<?php 
-require_once "../../konek.php"; 
-require_once "../../layout/header.php"; 
-require_once "../../layout/sidebar.php"; 
+<?php
+require_once "../../konek.php";
+require_once "../../layout/header.php";
+require_once "../../layout/sidebar.php";
+proteksi_admin_petugas();
 
-// 1. Ambil ID dari URL
 $id = $_GET['id'];
+$data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM kategori WHERE id = '$id'"));
 
-// 2. Ambil data lama dari database
-$ambil_data = mysqli_query($conn, "SELECT * FROM kategori WHERE id='$id'");
-$data = mysqli_fetch_assoc($ambil_data);
-
-// 3. Logika Update Data
-if (isset($_POST['update'])) {
+if(isset($_POST['update'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama_kategori']);
-    
-    $query = mysqli_query($conn, "UPDATE kategori SET nama_kategori='$nama' WHERE id='$id'");
-    
-    if ($query) {
-        echo "<script>alert('Data berhasil diubah!'); window.location='index.php';</script>";
-    } else {
-        echo "<script>alert('Gagal mengubah data.');</script>";
-    }
+    $update = mysqli_query($conn, "UPDATE kategori SET nama_kategori = '$nama' WHERE id = '$id'");
+    if($update) echo "<script>window.location='index.php';</script>";
 }
 ?>
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0">Edit Kategori</h5>
+<div class="p-6 max-w-2xl">
+    <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Edit Kategori</h2>
+        <p class="text-slate-500 mt-1">Mengubah ID: #<?= $id; ?></p>
     </div>
-    <div class="card-body">
-        <form action="" method="POST">
-            <div class="mb-3">
-                <label class="form-label fw-bold">Nama Kategori</label>
-                <!-- Value diisi dengan data lama dari database -->
-                <input type="text" name="nama_kategori" class="form-control" value="<?= $data['nama_kategori']; ?>" required>
+
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
+        <form method="POST" class="space-y-6">
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase ml-1">Nama Kategori</label>
+                <input type="text" name="nama_kategori" value="<?= $data['nama_kategori']; ?>" required
+                       class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium">
             </div>
-            <hr>
-            <div class="d-flex gap-2">
-                <button type="submit" name="update" class="btn btn-warning text-white">Update Data</button>
-                <a href="index.php" class="btn btn-secondary">Batal</a>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="index.php" class="bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl text-center hover:bg-slate-200 transition-all">Batal</a>
+                <button type="submit" name="update" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-100">
+                    Update Data
+                </button>
             </div>
         </form>
     </div>
 </div>
-
-<?php require_once "../../layout/footer.php"; ?>
