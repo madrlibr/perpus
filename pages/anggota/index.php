@@ -4,75 +4,82 @@ require_once "../../layout/header.php";
 require_once "../../layout/sidebar.php";
 proteksi_admin_petugas();
 
-$query = mysqli_query($conn, "SELECT * FROM anggota ORDER BY nama_anggota ASC");
+$search = $_GET['search'] ?? '';
+
+// Query Dasar
+$sql = "SELECT * FROM anggota WHERE 1=1";
+
+if ($search != '') {
+    $sql .= " AND (nama_anggota LIKE '%$search%' OR nisn LIKE '%$search%')";
+}
+
+$sql .= " ORDER BY nama_anggota ASC";
+$query = mysqli_query($conn, $sql);
+
 ?>
 
 <div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div class="flex justify-between items-center mb-8">
         <div>
             <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Data Anggota</h2>
-            <p class="text-slate-500 mt-1">Manajemen database siswa dan member perpustakaan.</p>
+            <p class="text-slate-500 mt-1">Kelola informasi siswa dan anggota perpustakaan.</p>
         </div>
-        
-        <a href="tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-200">
-            <i class="fas fa-user-plus text-sm"></i>
-            Tambah Anggota
+        <a href="tambah.php" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-lg shadow-blue-200 text-sm">
+            <i class="fas fa-user-plus mr-2"></i> Tambah Anggota
         </a>
     </div>
 
+    <!-- Search Bar -->
+    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 mb-8">
+        <form method="GET" action="" class="flex gap-4">
+            <div class="relative flex-1">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" name="search" value="<?= $search; ?>" placeholder="Cari Nama Anggota atau NISN..." 
+                       class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+            <button type="submit" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-900 transition-all">Cari</button>
+            <?php if($search != '') : ?>
+                <a href="index.php" class="bg-red-50 text-red-600 px-4 py-3 rounded-xl flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </a>
+            <?php endif; ?>
+        </form>
+    </div>
+
+    <!-- Table Anggota -->
     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50/50 border-b border-slate-100">
-                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Profil Anggota</th>
-                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">NISN</th>
-                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Gender</th>
-                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Kontak</th>
-                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    <?php while($row = mysqli_fetch_assoc($query)) : ?>
-                    <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="px-6 py-5">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-inner">
-                                    <?= strtoupper(substr($row['nama_anggota'], 0, 1)); ?>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-800 leading-tight"><?= $row['nama_anggota']; ?></h4>
-                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter mt-1">Terdaftar: <?= date('d M Y', strtotime($row['tanggal_mendaftar'])); ?></p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5 text-center">
-                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-mono font-bold"><?= $row['nisn']; ?></span>
-                        </td>
-                        <td class="px-6 py-5 text-center">
-                            <?php if ($row['jenis_kelamin'] == 'L') : ?>
-                                <span class="text-blue-500 bg-blue-50 px-2 py-1 rounded text-xs font-bold">Laki-laki</span>
-                            <?php else : ?>
-                                <span class="text-pink-500 bg-pink-50 px-2 py-1 rounded text-xs font-bold">Perempuan</span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="px-6 py-5 text-center">
-                            <p class="text-xs font-medium text-slate-600"><?= $row['no_telp']; ?></p>
-                        </td>
-                        <td class="px-6 py-5 text-right">
-                            <div class="flex justify-end gap-2">
-                                <a href="edit.php?id=<?= $row['id']; ?>" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all">
-                                    <i class="fas fa-edit text-sm"></i>
-                                </a>
-                                <a href="hapus.php?id=<?= $row['id']; ?>" onclick="return confirm('Hapus anggota ini?')" class="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all">
-                                    <i class="fas fa-trash-alt text-sm"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <th class="px-6 py-4">NISN</th>
+                    <th class="px-6 py-4">Nama Lengkap</th>
+                    <th class="px-6 py-4">Kontak & Alamat</th>
+                    <th class="px-6 py-4">Jenis Kelamin</th>
+                    <th class="px-6 py-4 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <?php while($row = mysqli_fetch_assoc($query)) : ?>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4 font-mono text-xs text-blue-600 font-bold"><?= $row['nisn']; ?></td>
+                    <td class="px-6 py-4 font-bold text-slate-800"><?= $row['nama_anggota']; ?></td>
+                    <td class="px-6 py-4 text-xs text-slate-500">
+                        <div><i class="fas fa-phone mr-1"></i> <?= $row['no_telp'] ?: '-'; ?></div>
+                        <div class="italic"><i class="fas fa-map-marker-alt mr-1"></i> <?= $row['alamat'] ?: '-'; ?></div>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-800"><?= $row['jenis_kelamin']; ?></td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a href="edit.php?id=<?= $row['id']; ?>" class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all"><i class="fas fa-edit text-xs"></i></a>
+                            <button onclick="konfirmasiHapus('hapus.php?id=<?= $row['id'] ?>')" 
+                                    class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
     </div>
 </div>

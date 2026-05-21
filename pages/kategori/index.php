@@ -2,10 +2,29 @@
 require_once "../../konek.php";
 require_once "../../layout/header.php";
 require_once "../../layout/sidebar.php";
-proteksi_admin_petugas();
 
-$query = mysqli_query($conn, "SELECT * FROM kategori ORDER BY id DESC");
+$search = $_GET['search'] ?? '';
+$sql = "SELECT * FROM kategori WHERE 1=1";
+if ($search != '') {
+    $sql .= " AND nama_kategori LIKE '%$search%'";
+}
+$sql .= " ORDER BY id ASC";
+$query = mysqli_query($conn, $sql);
 ?>
+
+<div class="mb-8 bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">
+    <form method="GET" class="flex gap-3">
+        <div class="relative flex-1">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="search" value="<?= $search ?>" placeholder="Cari kategori..." 
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+        </div>
+        <button type="submit" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold">Cari</button>
+        <?php if($search != '') : ?>
+            <a href="index.php" class="bg-red-50 text-red-600 px-4 py-3 rounded-xl flex items-center justify-center"><i class="fas fa-times"></i></a>
+        <?php endif; ?>
+    </form>
+</div>
 
 <div class="p-6">
     <div class="flex justify-between items-center mb-8">
@@ -36,9 +55,10 @@ $query = mysqli_query($conn, "SELECT * FROM kategori ORDER BY id DESC");
                         <a href="edit.php?id=<?= $row['id']; ?>" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all">
                             <i class="fas fa-edit text-xs"></i>
                         </a>
-                        <a href="hapus.php?id=<?= $row['id']; ?>" onclick="return confirm('Hapus kategori ini?')" class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
+                        <button onclick="konfirmasiHapus('hapus.php?id=<?= $row['id'] ?>')" 
+                                class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
                             <i class="fas fa-trash text-xs"></i>
-                        </a>
+                        </button>
                     </td>
                 </tr>
                 <?php endwhile; ?>

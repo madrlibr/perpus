@@ -111,6 +111,28 @@ if (!$data) {
                 </div>
                 <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-600/20 rounded-full blur-3xl"></div>
             </div>
+
+            <div class="mt-6 p-4 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Scan QR Code Buku</p>
+
+                <?php 
+                    // Kita gunakan ISBN sebagai data unik di dalam QR Code
+                    $isbn = $data['isbn']; 
+                    // URL API GoQR (data=$isbn)
+                    $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . $isbn;
+                ?>
+
+                <div class="p-3 bg-white shadow-md rounded-2xl">
+                    <img src="<?= $qr_url; ?>" alt="QR Code Buku" class="w-32 h-32">
+                </div>
+
+                <p class="mt-3 text-sm font-bold text-slate-700 font-mono"><?= $isbn; ?></p>
+
+                <button onclick="window.open('<?= $qr_url; ?>', '_blank')" class="mt-2 text-[10px] text-blue-600 font-bold uppercase hover:underline">
+                    <i class="fas fa-download mr-1"></i> Simpan QR
+                </button>
+            </div>
+            
         </div>
     </div>
 </div>

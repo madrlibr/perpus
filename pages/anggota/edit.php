@@ -1,14 +1,12 @@
 <?php
 require_once "../../konek.php";
 proteksi_admin_petugas();
-require_once "../../layout/header.php";
-require_once "../../layout/sidebar.php";
 
 $id = $_GET['id'];
 $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM anggota WHERE id = '$id'"));
 
 if (!$data) {
-    echo "<script>alert('Data tidak ditemukan!'); window.location.href='index.php';</script>";
+    header("Location: index.php");
     exit;
 }
 
@@ -28,11 +26,26 @@ if (isset($_POST['update'])) {
                                    WHERE id = '$id'");
 
     if ($update) {
-        echo "<script>alert('Data anggota berhasil diperbarui!'); window.location.href='index.php';</script>";
+        $_SESSION['notif'] = [
+            'tipe' => 'success',
+            'pesan' => 'Perubahan data berhasil disimpan!',
+            'judul' => 'Update Berhasil'
+    ];
+    header("Location: index.php");
+    exit;
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['notif'] = [
+                'tipe' => 'error',
+                'pesan' => 'Gagal memperbarui data: ' . mysqli_error($conn),
+                'judul' => 'Oops!'
+            ];
+            header("Location: index.php");
+            exit;
     }
 }
+
+require_once "../../layout/header.php";
+require_once "../../layout/sidebar.php";
 ?>
 
 <div class="p-6 max-w-4xl mx-auto">
@@ -100,9 +113,8 @@ if (isset($_POST['update'])) {
 
             <!-- Action Buttons -->
             <div class="flex flex-col md:flex-row gap-4 pt-6 border-t border-slate-50">
-                <button type="submit" name="update" class="flex-[2] bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-amber-100 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i>
-                    Simpan Perubahan Data
+                <button type="submit" name="update" id="btnSimpan" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2">
+                    <i class="fas fa-save"></i> Simpan Perubahan
                 </button>
                 <a href="index.php" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl text-center transition-all">
                     Batal
@@ -111,3 +123,12 @@ if (isset($_POST['update'])) {
         </form>
     </div>
 </div>
+
+<script>
+// Tambahkan script ini di bawah form edit kamu
+document.getElementById('formEdit').onsubmit = function() {
+    let btn = document.getElementById('btnSimpan');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+};
+</script>

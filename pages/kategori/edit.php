@@ -1,7 +1,5 @@
 <?php
 require_once "../../konek.php";
-require_once "../../layout/header.php";
-require_once "../../layout/sidebar.php";
 proteksi_admin_petugas();
 
 $id = $_GET['id'];
@@ -10,8 +8,26 @@ $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM kategori WHERE id 
 if(isset($_POST['update'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama_kategori']);
     $update = mysqli_query($conn, "UPDATE kategori SET nama_kategori = '$nama' WHERE id = '$id'");
-    if($update) echo "<script>window.location='index.php';</script>";
+    if ($update) {
+    $_SESSION['notif'] = [
+        'tipe' => 'success',
+        'pesan' => 'Perubahan data berhasil disimpan!',
+        'judul' => 'Update Berhasil'
+    ];
+    header("Location: index.php");
+    exit;
+    } else {
+        $_SESSION['notif'] = [
+                'tipe' => 'error',
+                'pesan' => 'Gagal memperbarui data: ' . mysqli_error($conn),
+                'judul' => 'Oops!'
+            ];-
+            header("Location: index.php");
+            exit;
+    }
 }
+require_once "../../layout/header.php";
+require_once "../../layout/sidebar.php";
 ?>
 
 <div class="p-6 max-w-2xl">

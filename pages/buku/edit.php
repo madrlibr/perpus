@@ -1,8 +1,6 @@
 <?php
 require_once "../../konek.php";
 proteksi_admin_petugas();
-require_once "../../layout/header.php";
-require_once "../../layout/sidebar.php";
 
 $id = $_GET['id'];
 $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM buku WHERE id='$id'"));
@@ -31,11 +29,26 @@ if (isset($_POST['update'])) {
                                    WHERE id     = '$id'");
 
     if ($update) {
-        echo "<script>alert('Perubahan Berhasil Disimpan!'); window.location.href='index.php';</script>";
+        session_start();
+        $_SESSION['notif'] = [
+            'tipe' => 'success',
+            'pesan' => 'Perubahan data berhasil disimpan!',
+            'judul' => 'Update Berhasil'
+    ];
+    header("Location: index.php");
+    exit;
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['notif'] = [
+                'tipe' => 'error',
+                'pesan' => 'Gagal memperbarui data: ' . mysqli_error($conn),
+                'judul' => 'Oops!'
+            ];
+            header("Location: index.php");
+    exit;
     }
 }
+require_once "../../layout/header.php";
+require_once "../../layout/sidebar.php";
 ?>
 
 <div class="p-6 max-w-5xl mx-auto">

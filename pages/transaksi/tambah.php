@@ -4,109 +4,109 @@ proteksi_admin_petugas();
 require_once "../../layout/header.php";
 require_once "../../layout/sidebar.php";
 
+// Logika Simpan
 if (isset($_POST['pinjam'])) {
     $id_anggota = $_POST['id_anggota'];
-    $id_buku    = $_POST['id_buku'];
-    
-    // Perbaikan: Pastikan session ID ada. 
-    // Coba ganti ['id'] menjadi ['id_user'] jika di login.php kamu pakai nama itu.
-    $id_user    = $_SESSION['id'] ?? $_SESSION['id_user'] ?? null; 
-    
-    if (!$id_user) {
-        echo "<script>alert('Sesi petugas habis, silakan login ulang!'); window.location.href='../../login.php';</script>";
-        exit;
-    }
+    $id_user = $_SESSION['id_user'] ?? $_SESSION['id'];
+    $tgl_pinjam = $_POST['tanggal_pinjam'];
+    $tgl_kembali = $_POST['tanggal_kembali_seharusnya'];
+    $daftar_buku = $_POST['id_buku']; // Berupa Array
 
-    $tgl_pinjam  = date('Y-m-d');
-    $tgl_kembali = date('Y-m-d', strtotime('+7 days')); 
-    $status      = 'dipinjam'; 
+    mysqli_begin_transaction($conn);
+    try {
+        // 1. Simpan ke tabel Peminjaman (Header)
+        $query_p = "INSERT INTO peminjaman (id_anggota, id_user, tanggal_pinjam, tanggal_kembali_seharusnya, status_pinjam) 
+                    VALUES ('$id_anggota', '$id_user', '$tgl_pinjam', '$tgl_kembali', 'dipinjam')";
+        mysqli_query($conn, $query_p);
+        $id_peminjaman = mysqli_insert_id($conn);
 
-    $cek_stok = mysqli_fetch_assoc(mysqli_query($conn, "SELECT stok FROM buku WHERE id='$id_buku'"));
-    
-    if ($cek_stok['stok'] > 0) {
-        // Gunakan prepared statement atau pastikan variabel terisi
-        $query_text = "INSERT INTO peminjaman 
-                       (id_anggota, id_buku, id_user, tanggal_pinjam, tanggal_kembali_seharusnya, status_pinjam) 
-                       VALUES 
-                       ('$id_anggota', '$id_buku', '$id_user', '$tgl_pinjam', '$tgl_kembali', '$status')";
-        
-        $insert = mysqli_query($conn, $query_text);
-        
-        if ($insert) {
-            mysqli_query($conn, "UPDATE buku SET stok = stok - 1 WHERE id='$id_buku'");
-            echo "<script>alert('Peminjaman Berhasil!'); window.location.href='index.php';</script>";
-        } else {
-            echo "Error Database: " . mysqli_error($conn);
+        // 2. Simpan ke tabel Detail_Peminjaman (Multi-Baris)
+        foreach ($daftar_buku as $id_buku) {
+            if(!empty($id_buku)) {
+                mysqli_query($conn, "INSERT INTO detail_peminjaman (id_peminjaman, id_buku, status_buku) VALUES ('$id_peminjaman', '$id_buku', 'dipinjam')");
+                // Potong Stok
+                mysqli_query($conn, "UPDATE buku SET stok = stok - 1 WHERE id = '$id_buku'");
+            }
         }
-    } else {
-        echo "<script>alert('Maaf, Stok Buku Habis!');</script>";
+
+        mysqli_commit($conn);
+        $_SESSION['notif'] = ['tipe' => 'success', 'judul' => 'Berhasil!', 'pesan' => 'Peminjaman multi-buku berhasil dicatat.'];
+        echo "<script>window.location.href='index.php';</script>";
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        echo "Error: " . $e->getMessage();
     }
 }
 ?>
 
-<div class="p-6 max-w-4xl mx-auto">
+<div class="p-6 max-w-5xl mx-auto">
     <div class="mb-8 text-center">
-        <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Input Peminjaman Baru</h2>
-        <p class="text-slate-500 mt-2">Pastikan data anggota dan buku sudah benar sebelum memproses.</p>
+        <h2 class="text-3xl font-black text-slate-800">Transaksi Baru</h2>
+        <p class="text-slate-500">Petugas dapat menginput lebih dari satu buku dalam satu sesi.</p>
     </div>
 
-    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
-        <form action="" method="POST" class="p-10 space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Pilih Anggota -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-bold text-slate-700 ml-1">Pilih Anggota</label>
-                    <div class="relative">
-                        <select name="id_anggota" required class="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none">
-                            <option value="">-- Cari Nama Anggota --</option>
-                            <?php 
-                            $ang = mysqli_query($conn, "SELECT * FROM anggota");
-                            while($a = mysqli_fetch_assoc($ang)) echo "<option value='".$a['id']."'>".$a['nama_anggota']."</option>";
-                            ?>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pilih Buku -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-bold text-slate-700 ml-1">Pilih Buku</label>
-                    <div class="relative">
-                        <select name="id_buku" required class="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none">
-                            <option value="">-- Cari Judul Buku --</option>
-                            <?php 
-                            $bku = mysqli_query($conn, "SELECT * FROM buku WHERE stok > 0");
-                            while($b = mysqli_fetch_assoc($bku)) echo "<option value='".$b['id']."'>".$b['judul_buku']." (Stok: ".$b['stok'].")</option>";
-                            ?>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kartu Info Otomatis -->
-            <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-4">
-                <div class="p-3 bg-indigo-500 text-white rounded-xl shadow-lg">
-                    <i class="fas fa-calendar-check fa-lg"></i>
-                </div>
+    <form action="" method="POST" class="space-y-6">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
-                    <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Durasi Peminjaman</p>
-                    <p class="text-sm text-indigo-900 leading-relaxed">Sistem menetapkan batas pengembalian **7 hari** secara otomatis. Keterlambatan dapat dikenakan denda sesuai kebijakan perpustakaan.</p>
+                    <label class="block text-xs font-black text-slate-400 uppercase mb-2">Pilih Anggota</label>
+                    <select name="id_anggota" required class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Cari Nama --</option>
+                        <?php 
+                        $ang = mysqli_query($conn, "SELECT * FROM anggota");
+                        while($a = mysqli_fetch_assoc($ang)) echo "<option value='".$a['id']."'>".$a['nama_anggota']."</option>";
+                        ?>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-400 uppercase mb-2">Tgl Pinjam</label>
+                        <input type="date" name="tanggal_pinjam" value="<?= date('Y-m-d') ?>" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-400 uppercase mb-2">Batas Kembali</label>
+                        <input type="date" name="tanggal_kembali_seharusnya" value="<?= date('Y-m-d', strtotime('+7 days')) ?>" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                    </div>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4 pt-4">
-                <button type="submit" name="pinjam" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 transition-all active:scale-95">
-                    Konfirmasi & Simpan Transaksi
-                </button>
-                <a href="index.php" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl text-center transition-all">
-                    Batal
-                </a>
+            <div id="wrapper-buku" class="space-y-4">
+                <label class="block text-xs font-black text-slate-400 uppercase mb-2">Daftar Buku yang Dipinjam</label>
+                <div class="flex gap-3 item-buku">
+                    <select name="id_buku[]" required class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none">
+                        <option value="">-- Pilih Buku --</option>
+                        <?php 
+                        $buku = mysqli_query($conn, "SELECT * FROM buku WHERE stok > 0");
+                        while($b = mysqli_fetch_assoc($buku)) echo "<option value='".$b['id']."'>".$b['judul_buku']." (Stok: ".$b['stok'].")</option>";
+                        ?>
+                    </select>
+                    <button type="button" onclick="tambahBaris()" class="w-12 h-12 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
             </div>
-        </form>
-    </div>
+
+            <div class="mt-10 flex gap-4">
+                <button type="submit" name="pinjam" class="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-black transition-all">Simpan Transaksi</button>
+                <a href="index.php" class="px-8 py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl">Batal</a>
+            </div>
+        </div>
+    </form>
 </div>
+
+<script>
+function tambahBaris() {
+    const wrapper = document.getElementById('wrapper-buku');
+    const newDiv = document.createElement('div');
+    newDiv.className = 'flex gap-3 item-buku mt-3 animate-in fade-in slide-in-from-top-2 duration-300';
+    newDiv.innerHTML = `
+        <select name="id_buku[]" required class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+            ${document.querySelector('select[name="id_buku[]"]').innerHTML}
+        </select>
+        <button type="button" onclick="this.parentElement.remove()" class="w-12 h-12 bg-red-100 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    `;
+    wrapper.appendChild(newDiv);
+}
+</script>

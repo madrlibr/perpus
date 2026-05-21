@@ -17,8 +17,44 @@ if (isset($_POST['simpan'])) {
     $query = mysqli_query($conn, "INSERT INTO buku (judul_buku, isbn, stok, tahun_terbit, id_kategori, id_penulis, id_penerbit, id_rak) 
                                   VALUES ('$judul', '$isbn', '$stok', '$tahun', '$kategori', '$penulis', '$penerbit', '$rak')");
 
-    if ($query) {
-        echo "<script>alert('Buku Berhasil Ditambahkan!'); window.location.href='index.php';</script>";
+if ($query) {
+    echo "
+    <!-- Load SweetAlert2 dari CDN -->
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Buku Berhasil Ditambahkan!',
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Oke'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
+            });
+        });
+    </script>";
+    }else{
+        echo "
+        <!-- Load SweetAlert2 dari CDN -->
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Buku Gagal Ditambahkan!',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Oke'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'index.php';
+                    }
+                });
+            });
+        </script>";
     }
 }
 ?>
@@ -53,6 +89,12 @@ if (isset($_POST['simpan'])) {
                     while($p = mysqli_fetch_assoc($pnl)) echo "<option value='".$p['id']."'>".$p['nama_penulis']."</option>";
                     ?>
                 </select>
+
+                <a href="../penulis/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i class="fas fa-plus text-xs"></i>
+                    Tambah Penulis
+                </a>
+
             </div>
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Penerbit</label>
@@ -63,6 +105,11 @@ if (isset($_POST['simpan'])) {
                     while($pb = mysqli_fetch_assoc($pnb)) echo "<option value='".$pb['id']."'>".$pb['nama_penerbit']."</option>";
                     ?>
                 </select>
+
+                <a href="../penerbit/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i class="fas fa-plus text-xs"></i>
+                    Tambah Penerbit
+                </a>
             </div>
 
             <div>
@@ -75,8 +122,8 @@ if (isset($_POST['simpan'])) {
                     ?>
                 </select>
 
-                <a href="../kategori/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
-                    <i class="fas fa-plus text-sm"></i>
+                <a href="../kategori/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i class="fas fa-plus text-xs"></i>
                     Tambah Kategori
                 </a>
 
@@ -90,6 +137,11 @@ if (isset($_POST['simpan'])) {
                     while($r = mysqli_fetch_assoc($rak_q)) echo "<option value='".$r['id']."'>".$r['nama_rak']."</option>";
                     ?>
                 </select>
+
+                <a href="../rak/tambah.php" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i class="fas fa-plus text-xs"></i>
+                    Tambah Rak
+                </a>
             </div>
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Stok</label>

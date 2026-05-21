@@ -7,32 +7,52 @@ proteksi_admin_petugas();
 if(isset($_POST['simpan'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama_kategori']);
     $insert = mysqli_query($conn, "INSERT INTO kategori (nama_kategori) VALUES ('$nama')");
-    if($insert) echo "<script>window.location='index.php';</script>";
+    
+    if ($insert) {
+    echo "
+    <!-- Load SweetAlert2 dari CDN -->
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Buku Berhasil Ditambahkan!',
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Oke'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
+            });
+        });
+    </script>";
+}
 }
 ?>
 
-<div class="p-6 max-w-2xl">
-    <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Tambah Kategori</h2>
-        <a href="index.php" class="text-blue-600 text-sm font-bold flex items-center gap-2 mt-2 hover:underline">
-            <i class="fas fa-arrow-left text-xs"></i> Kembali ke daftar kategori
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8 flex items-center gap-4">
+        <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-amber-600 transition-all">
+            <i class="fas fa-arrow-left"></i>
         </a>
-
-        <a href="../buku/tambah.php" class="text-blue-600 text-sm font-bold flex items-center gap-2 mt-2 hover:underline">
-            <i class="fas fa-arrow-left text-xs"></i> Kembali ke daftar Buku
-        </a>
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Tambah kategori</h2>
+            <p class="text-sm text-slate-500">Masukkan Kategori baru.</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
-        <form method="POST" class="space-y-6">
-            <div class="space-y-2">
-                <label class="text-xs font-bold text-slate-400 uppercase ml-1">Nama Kategori</label>
-                <input type="text" name="nama_kategori" placeholder="Contoh: Fiksi, Sains, Sejarah" required autofocus
-                       class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium">
+    <form method="POST" action="" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div class="space-y-6">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2">Nama Kategori</label>
+                <input type="text" name="nama_kategori" required placeholder="Contoh: Sains, Fantasi, Teknologi" 
+                       class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all">
             </div>
-            <button type="submit" name="simpan" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-slate-200">
-                Simpan Kategori Baru
+
+            <button type="submit" name="simpan" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-save text-sm"></i> Simpan Data Kategori
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>

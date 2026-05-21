@@ -2,7 +2,6 @@
 require_once "../../konek.php";
 require_once "../../layout/header.php";
 require_once "../../layout/sidebar.php";
-proteksi_admin_petugas();
 
 // Ambil parameter filter
 $search   = $_GET['search'] ?? '';
@@ -135,12 +134,16 @@ $query = mysqli_query($conn, $sql);
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2">
+                                    <a href="detail.php?id=<?= $row['id']; ?>" class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-all">
+                                        <i class="fas fa-eye text-xs"></i>
+                                    </a>
                                     <a href="edit.php?id=<?= $row['id']; ?>" class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all">
                                         <i class="fas fa-edit text-xs"></i>
                                     </a>
-                                    <a href="hapus.php?id=<?= $row['id']; ?>" onclick="return confirm('Hapus buku ini?')" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
+                                    <button onclick="konfirmasiHapus('hapus.php?id=<?= $row['id'] ?>')" 
+                                            class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all">
                                         <i class="fas fa-trash text-xs"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -158,3 +161,5 @@ $query = mysqli_query($conn, $sql);
         </div>
     </div>
 </div>
+
+<?php require_once "../../layout/footer.php"; ?>

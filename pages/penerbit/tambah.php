@@ -2,6 +2,7 @@
 require_once "../../konek.php"; 
 require_once "../../layout/header.php"; 
 require_once "../../layout/sidebar.php"; 
+proteksi_admin_petugas();
 
 if (isset($_POST['simpan'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama_penerbit']);
@@ -10,32 +11,60 @@ if (isset($_POST['simpan'])) {
     $query = mysqli_query($conn, "INSERT INTO penerbit (nama_penerbit, alamat_penerbit) VALUES ('$nama', '$alamat')");
     
     if ($query) {
-        echo "<script>alert('Penerbit berhasil ditambah!'); window.location='index.php';</script>";
-    } else {
-        echo "<script>alert('Gagal menambah data.');</script>";
+    echo "
+    <!-- Load SweetAlert2 dari CDN -->
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Buku Berhasil Ditambahkan!',
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Oke'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
+            });
+        });
+    </script>";
+    }else{
+       echo "Error: " . mysqli_error($conn);
     }
 }
 ?>
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white">
-        <h5 class="mb-0">Tambah Penerbit</h5>
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8 flex items-center gap-4">
+        <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-purple-600 transition-all">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Tambah Penerbit</h2>
+            <p class="text-sm text-slate-500">Daftarkan mitra penerbit baru.</p>
+        </div>
     </div>
-    <div class="card-body">
-        <form action="" method="POST">
-            <div class="mb-3">
-                <label class="form-label fw-bold">Nama Penerbit</label>
-                <input type="text" name="nama_penerbit" class="form-control" placeholder="Contoh: Gramedia" required>
+
+    <form method="POST" action="" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div class="space-y-6">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2">Nama Penerbit</label>
+                <input type="text" name="nama_penerbit" required placeholder="Contoh: PT. Gramedia" 
+                       class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all">
             </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Alamat</label>
-                <textarea name="alamat_penerbit" class="form-control" rows="3" required></textarea>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2">Alamat Kantor</label>
+                <textarea name="alamat_penerbit" rows="3" placeholder="Alamat lengkap penerbit..." 
+                          class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all resize-none"></textarea>
             </div>
-            <hr>
-            <button type="submit" name="simpan" class="btn btn-primary">Simpan Data</button>
-            <a href="index.php" class="btn btn-secondary">Batal</a>
-        </form>
-    </div>
+
+            <button type="submit" name="simpan" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-200 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-check-circle text-sm"></i> Daftarkan Penerbit
+            </button>
+        </div>
+    </form>
 </div>
 
 <?php require_once "../../layout/footer.php"; ?>

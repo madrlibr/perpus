@@ -7,126 +7,116 @@ require_once "../layout/sidebar.php";
 $buku      = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM buku"));
 $anggota   = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM anggota"));
 $kategori  = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM kategori"));
-$transaksi = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM peminjaman WHERE status_pinjam='dipinjam'"));
+$transaksi = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM detail_peminjaman WHERE status_buku='dipinjam'"));
+
+$tgl_sekarang = date('Y-m-d');
+
+// FIX QUERY: Menghubungkan peminjaman ke detail_peminjaman untuk mendapatkan data buku
+$sql_late = "SELECT p.id as id_peminjaman, p.tanggal_kembali_seharusnya, 
+                    a.nama_anggota, a.no_telp, b.judul_buku, 
+                    DATEDIFF('$tgl_sekarang', p.tanggal_kembali_seharusnya) as hari_terlambat
+             FROM detail_peminjaman dp
+             JOIN peminjaman p ON dp.id_peminjaman = p.id
+             JOIN anggota a ON p.id_anggota = a.id
+             JOIN buku b ON dp.id_buku = b.id
+             WHERE dp.status_buku = 'dipinjam' 
+             AND p.tanggal_kembali_seharusnya < '$tgl_sekarang'
+             ORDER BY hari_terlambat DESC";
+
+$query_late = mysqli_query($conn, $sql_late);
+$jumlah_late = mysqli_num_rows($query_late);
 ?>
 
-<div class="p-6 space-y-8"> 
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Dashboard</h2>
-            <p class="text-slate-500 mt-1">Selamat datang kembali, <span class="font-semibold text-blue-600"><?= $_SESSION['username']; ?></span> 👋</p>
-        </div>
-        <div class="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            <div class="bg-blue-50 p-2 rounded-xl text-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <span class="text-sm font-medium text-slate-700 pr-4"><?= date('d F Y'); ?></span>
-        </div>
+<div class="p-6">
+    <div class="mb-8">
+        <h2 class="text-3xl font-black text-slate-800">Halo, <?= $_SESSION['username']; ?>! 👋</h2>
+        <p class="text-slate-500">Selamat datang di panel <?= $_SESSION['role']; ?> Perpusku.</p>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Buku -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-50 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Total Buku</p>
-                    <h3 class="text-3xl font-bold text-slate-800 mt-1"><?= $buku; ?></h3>
-                </div>
-                <div class="bg-blue-500 text-white p-3 rounded-2xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-book fa-xl"></i>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-book text-xl"></i>
             </div>
-            <div class="mt-4 flex items-center text-xs font-medium text-blue-600">
-                <span class="bg-blue-50 px-2 py-1 rounded-lg">Data Koleksi</span>
-            </div>
+            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Total Buku</p>
+            <h3 class="text-2xl font-black text-slate-800"><?= $buku; ?></h3>
         </div>
 
-        <!-- Total Anggota -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-50 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Anggota</p>
-                    <h3 class="text-3xl font-bold text-slate-800 mt-1"><?= $anggota; ?></h3>
-                </div>
-                <div class="bg-emerald-500 text-white p-3 rounded-2xl shadow-lg shadow-emerald-200 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-users fa-xl"></i>
-                </div>
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-tags text-xl"></i>
             </div>
-            <div class="mt-4 flex items-center text-xs font-medium text-emerald-600">
-                <span class="bg-emerald-50 px-2 py-1 rounded-lg">Siswa Terdaftar</span>
-            </div>
+            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Kategori</p>
+            <h3 class="text-2xl font-black text-slate-800"><?= $kategori; ?></h3>
         </div>
 
-        <!-- Kategori -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-violet-50 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Kategori</p>
-                    <h3 class="text-3xl font-bold text-slate-800 mt-1"><?= $kategori; ?></h3>
+        <?php if ($_SESSION['role'] != 'anggota') : ?>
+            <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4">
+                    <i class="fas fa-users text-xl"></i>
                 </div>
-                <div class="bg-violet-500 text-white p-3 rounded-2xl shadow-lg shadow-violet-200 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-tags fa-xl"></i>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Total Anggota</p>
+                <h3 class="text-2xl font-black text-slate-800"><?= $anggota; ?></h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-4">
+                    <i class="fas fa-exchange-alt text-xl"></i>
                 </div>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Buku Dipinjam</p>
+                <h3 class="text-2xl font-black text-slate-800"><?= $transaksi; ?></h3>
             </div>
-            <div class="mt-4 flex items-center text-xs font-medium text-violet-600">
-                <span class="bg-violet-50 px-2 py-1 rounded-lg">Genre Buku</span>
-            </div>
+        <?php endif; ?>
+    </div>
+    
+    <?php if ($_SESSION['role'] == 'anggota') : ?>
+        <div class="mt-8 p-8 bg-blue-600 rounded-[2.5rem] text-white">
+            <h3 class="text-xl font-bold mb-2">Ingin meminjam buku?</h3>
+            <p class="opacity-80 text-sm">Silakan cari buku di menu Katalog, dan temui petugas untuk proses peminjaman.</p>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($jumlah_late > 0) : ?>
+    <div class="mt-12 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-2 h-8 bg-red-500 rounded-full"></div>
+            <h3 class="text-xl font-bold text-slate-800">Peringatan Keterlambatan</h3>
+            <span class="px-3 py-1 bg-red-100 text-red-600 text-xs font-black rounded-full">
+                <?= $jumlah_late; ?> PERLU TINDAKAN
+            </span>
         </div>
 
-        <!-- Pinjaman Aktif -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-orange-50 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Pinjaman Aktif</p>
-                    <h3 class="text-3xl font-bold text-slate-800 mt-1"><?= $transaksi; ?></h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <?php while($late = mysqli_fetch_assoc($query_late)) : ?>
+            <div class="bg-white border-2 border-red-50 border-l-red-500 border-l-4 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
+                        Telat <?= $late['hari_terlambat']; ?> Hari
+                    </span>
+                    <a href="transaksi/detail.php?id=<?= $late['id_peminjaman']; ?>" class="text-slate-400 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-external-link-alt text-xs"></i>
+                    </a>
                 </div>
-                <div class="bg-orange-500 text-white p-3 rounded-2xl shadow-lg shadow-orange-200 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-exchange-alt fa-xl"></i>
+                
+                <h4 class="font-bold text-slate-800 line-clamp-1"><?= $late['judul_buku']; ?></h4>
+                <p class="text-slate-500 text-sm mb-4"><?= $late['nama_anggota']; ?></p>
+                
+                <div class="flex items-center justify-between pt-3 border-t border-slate-50">
+                    <div class="flex items-center gap-2">
+                        <i class="fab fa-whatsapp text-emerald-500"></i>
+                        <span class="text-xs font-bold text-slate-600"><?= $late['no_telp'] ?? '-'; ?></span>
+                    </div>
+                    <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $late['no_telp']); ?>?text=Halo%20<?= urlencode($late['nama_anggota']); ?>,%20kami%20dari%20Perpustakaan%20ingin%20mengingatkan%20untuk%20mengembalikan%20buku%20<?= urlencode($late['judul_buku']); ?>%20yang%20sudah%20telat%20<?= $late['hari_terlambat']; ?>%20hari.%20Terima%20kasih." 
+                       target="_blank"
+                       class="text-[10px] font-bold text-blue-600 hover:underline uppercase">
+                        Hubungi
+                    </a>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-xs font-medium text-orange-600">
-                <span class="bg-orange-50 px-2 py-1 rounded-lg">Buku Dipinjam</span>
-            </div>
+            <?php endwhile; ?>
         </div>
     </div>
-
-    <!-- Quick Info Section -->
-    <div class="bg-slate-800 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-200">
-        <div class="relative z-10">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="bg-white/10 p-2 rounded-lg backdrop-blur-md">
-                    <i class="fas fa-info-circle text-blue-400"></i>
-                </div>
-                <h4 class="text-xl font-bold">Petunjuk Cepat Sistem</h4>
-            </div>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        <span class="text-blue-400 font-bold block mb-1">Master Data</span>
-                        Kelola buku dan anggota melalui sidebar. Pastikan kategori sudah tersedia.
-                    </p>
-                </div>
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        <span class="text-emerald-400 font-bold block mb-1">Peminjaman</span>
-                        Cek stok buku di menu transaksi sebelum mengizinkan peminjaman baru.
-                    </p>
-                </div>
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        <span class="text-orange-400 font-bold block mb-1">Laporan</span>
-                        Gunakan menu laporan untuk rekapitulasi data per periode (Khusus Admin).
-                    </p>
-                </div>
-            </div>
-        </div>
-        <!-- Decorative Circle -->
-        <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl"></div>
-    </div>
+    <?php endif; ?>
 </div>
 
 <?php 
